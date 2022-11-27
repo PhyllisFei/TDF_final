@@ -22,8 +22,8 @@ function setup() {
     bgclr = color(200);
 
     for (let i = 0; i < 5; i++) {
-        let x = 40 + 100 * i;
-        let y = random(height);
+        let x = 80 + 100 * i;
+        let y = random(50, height - 50);
         let r = 40;
         m = new Member(x, y, r);
         members.push(m);
@@ -46,7 +46,7 @@ function draw() {
         if (m.hovered(mouseX, mouseY)) {
             m.changeGlow(color(0, 0, 0, 150), 15);
 
-            /***** show popup window: NEED TO FIX *****/
+            //---- TO-BE-FIXED: show popup window ----//
             // if (mouseIsPressed) {
             // m.popupWindow();
             // }
@@ -54,19 +54,25 @@ function draw() {
             m.changeGlow(0, 0);
         }
 
-        /***** add attraction-collision behavior between sender and receiver: sender approaches to receiver — bounce — and collide *****/
+        /***** STATE 1 - default: no interaction among team members *****/
         for (let j = 0; j < members.length; j++) {
             if (i != j) {
                 let other = members[j];
                 m.checkCollisiion(other);
             }
         }
+
+        /***** STATE 2 — note sent: sender & receiver attract to each other *****/
+        /***** sudo attraction between members[0] and members[1] *****/
+        //---- TO-BE-ADDED: MQTT & websocket listener ----//
+
         // m.attract()
     }
 }
 
+//---- TO-BE-FIXED, see line 49: show popup window when mouse click on one member ----//
+/***** create a modal box *****/
 function popupWindow() {
-    //***** create a modal box
     popupDiv = createDiv();
     popupDiv.id('popupDiv');
     popupDiv.position(500, 500);
@@ -89,7 +95,7 @@ function popupWindow() {
 
 /***** send note pic if "Yes", currently changes bgclr as a place holder *****/
 function sendNote() {
-    //***** add MQTT & webSocket listener
+    //---- TO-BE-ADDED: MQTT & webSocket listener ----//
     bgclr = color(100, 230, 180);
 }
 
@@ -98,7 +104,6 @@ function hideDiv() {
     bgclr = color(200);
     popupDiv.hide();
 }
-
 
 /***** add a member to the screen *****/
 function keyPressed() {
@@ -112,7 +117,7 @@ function keyPressed() {
 function doubleClicked() {
     for (let i = members.length - 1; i >= 0; i--) {
         m = members[i];
-        if (m.contains(mouseX, mouseY)) {
+        if (m.hovered(mouseX, mouseY)) {
             members.splice(i, 1);
         }
     }
@@ -146,7 +151,7 @@ class Member {
     }
 
     // popupWindow() {
-    //     //create a modal box
+    /***** create a modal box *****/
     //     popupDiv = createDiv();
     //     popupDiv.id('popupDiv');
     //     popupDiv.position(this.pos.x, this.pos.y);
@@ -173,24 +178,28 @@ class Member {
     }
 
     applyForce(force) {
-        var f = createVector();
+        let f = createVector();
         f = force.copy();
-        f.div(this.mass);
+        // f.div(this.mass);
         this.acc.add(f);
     }
 
-    attract() {
-        //
-    }
-
+    /***** STATE 1 - default: no interaction among team members *****/
     checkCollisiion(other) {
         let vector = p5.Vector.sub(other.pos, this.pos);
         let distanceSq = vector.magSq();
 
         if (distanceSq < (this.dia + other.dia) * (this.dia + other.dia)) {
-            vector.mult(-0.003);
+            vector.mult(-0.001);
             this.applyForce(vector);
         }
+    }
+
+    /***** STATE 2 — note sent: sender & receiver attract to each other *****/
+    //??? identify who is sending and who is receving, need to bind
+    //sudo: members[0], members[1]
+    attract() {
+        //
     }
 
     update() {
@@ -214,8 +223,8 @@ class Member {
 
         stroke(this.r, this.g, this.b, 100)
         fill(this.r, this.g, this.b, 100);
-        ellipse(this.pos.x, this.pos.y, this.dia, this.dia);
+        ellipse(this.pos.x, this.pos.y, this.dia * 2, this.dia * 2);
 
-        image(this.mImg, this.pos.x, this.pos.y, this.dia * 2, this.dia * 2);
+        image(this.mImg, this.pos.x - 30, this.pos.y - 30, this.dia * 2, this.dia * 2);
     }
 }
