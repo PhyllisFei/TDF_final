@@ -10,7 +10,7 @@ let text;
 let btn1;
 let btn2;
 
-//preload image to array
+/***** preload image to array *****/
 function preload() {
     for (let i = 0; i < 2; i++) {
         mImgs[i] = loadImage('imgs/img' + i + '.png');
@@ -29,39 +29,44 @@ function setup() {
         members.push(m);
     }
 
-    popupWindow();
+    // popupWindow();
 }
 
 function draw() {
     background(bgclr);
 
-    for (m of members) {
-        // for (let i = 0; i < members.length; i++) {
-        console.log(members.length);
-        //mouse hover: glowing effect
-        if (m.contains(mouseX, mouseY)) {
+    for (let i = 0; i < members.length; i++) {
+        m = members[i];
+        // console.log(members.length);
+        m.update();
+        m.checkEdge();
+        m.display();
+
+        /***** mouse hover: glowing effect *****/
+        if (m.hovered(mouseX, mouseY)) {
             m.changeGlow(color(0, 0, 0, 150), 15);
 
-            //show popup window
-            if (mouseIsPressed) {
-                // m.popupWindow();
-            }
+            /***** show popup window: NEED TO FIX *****/
+            // if (mouseIsPressed) {
+            // m.popupWindow();
+            // }
         } else {
             m.changeGlow(0, 0);
         }
 
-        //***** add attraction-collision behavior between sender and receiver: sender approaches to receiver — bounce — and collide *****//
+        /***** add attraction-collision behavior between sender and receiver: sender approaches to receiver — bounce — and collide *****/
+        for (let j = 0; j < members.length; j++) {
+            if (i != j) {
+                let other = members[j];
+                m.checkCollisiion(other);
+            }
+        }
         // m.attract()
-        // m.collide();
-
-        m.update();
-        m.bounce();
-        m.display();
     }
 }
 
 function popupWindow() {
-    //create a modal box
+    //***** create a modal box
     popupDiv = createDiv();
     popupDiv.id('popupDiv');
     popupDiv.position(500, 500);
@@ -82,30 +87,28 @@ function popupWindow() {
     btn2.mousePressed(hideDiv);
 }
 
-//send note pic if "Yes", currently changes bgclr as a place holder
+/***** send note pic if "Yes", currently changes bgclr as a place holder *****/
 function sendNote() {
-    //add MQTT & webSocket listener
+    //***** add MQTT & webSocket listener
     bgclr = color(100, 230, 180);
 }
 
-//close popup window if "No"
+/***** close popup window if "No" *****/
 function hideDiv() {
     bgclr = color(200);
     popupDiv.hide();
 }
 
 
-//add a member to the screen
+/***** add a member to the screen *****/
 function keyPressed() {
     m = new Member(random(width), random(height), 40);
     if (keyCode === UP_ARROW) {
         members.push(m);
     }
-    //   if (keyCode === DOWN_ARROW) {
-    //   }
 }
 
-//remove a member from the screen
+/***** remove a member from the screen *****/
 function doubleClicked() {
     for (let i = members.length - 1; i >= 0; i--) {
         m = members[i];
@@ -117,31 +120,23 @@ function doubleClicked() {
 
 
 class Member {
-    constructor(x, y, dia) {
-        // this.x = x;
-        // this.y = y;
-        // this.dia = dia;
-        // this.xSpd = random(-0.15, 0.15);
-        // this.ySpd = random(-0.15, 0.15);
+    constructor(x, y, mass) {
+        this.pos = createVector(x, y);
+        this.vel = p5.Vector.random2D();
+        this.acc = createVector();
+        // this.mass = mass;
+        this.dia = mass * 1;
+
         this.r = random(100);
         this.g = random(255);
         this.b = random(255);
         this.mImg = random(mImgs);
         this.blurriness = 0;
         this.glowColor = 0;
-
-        this.pos = createVector(x, y);
-        // this.vel = p5.Vector.random2D();
-        this.vel = createVector();
-        this.acc = createVector();
-        // this.mass = m;
-        this.dia = dia;
     }
 
-    contains(px, py) {
-        // let d = dist(px, py, this.x, this.y)
+    hovered(px, py) {
         let d = dist(px, py, this.pos.x, this.pos.y)
-        // console.log(d);
         if (d < this.r) {
             console.log('note sent, members interacted!');
             return true;
@@ -177,7 +172,6 @@ class Member {
         this.glowColor = clr;
     }
 
-
     applyForce(force) {
         var f = createVector();
         f = force.copy();
@@ -194,35 +188,25 @@ class Member {
         let distanceSq = vector.magSq();
 
         if (distanceSq < (this.dia + other.dia) * (this.dia + other.dia)) {
-            vector.mult(-0.5);
+            vector.mult(-0.003);
             this.applyForce(vector);
         }
     }
 
-    applyRestitution(amount) {
-        let value = 1.0 + amount;
-        this.vel.mult(value);
-    }
-
     update() {
-        // this.x += this.xSpd;
-        // this.y += this.ySpd;
-
         this.vel.add(this.acc);
         this.pos.add(this.vel);
         this.acc.mult(0);
     }
 
-    bounce() {
-        if (this.x < 0 || this.x > width) {
-            this.xSpd *= -1;
+    checkEdge() {
+        if (this.pos.x < 50 || this.pos.x > width - 50) {
+            this.vel.x *= -1;
         }
-        if (this.y < 0 || this.y > height) {
-            this.ySpd *= -1;
+        if (this.pos.y < 50 || this.pos.y > height - 50) {
+            this.vel.y *= -1;
         }
     }
-
-
 
     display() {
         drawingContext.shadowBlur = this.blurriness;
@@ -232,7 +216,6 @@ class Member {
         fill(this.r, this.g, this.b, 100);
         ellipse(this.pos.x, this.pos.y, this.dia, this.dia);
 
-        // image(this.mImg, this.x, this.y, this.dia*2, this.dia*2);
         image(this.mImg, this.pos.x, this.pos.y, this.dia * 2, this.dia * 2);
     }
 }
