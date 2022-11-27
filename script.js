@@ -16,9 +16,7 @@ function setup() {
         let x = 40 + 100 * i;
         let y = random(height);
         let r = 40;
-        let mImg = random(mImgs);
-        m = new Member(x, y, r, mImg);
-        // m = new Member(x, y, r);
+        m = new Member(x, y, r);
         members.push(m);
     }
 }
@@ -65,7 +63,7 @@ function doubleClicked() {
 
 
 class Member {
-    constructor(x, y, dia, img) {
+    constructor(x, y, dia) {
         this.x = x;
         this.y = y;
         this.dia = dia;
@@ -74,7 +72,7 @@ class Member {
         this.r = random(100);
         this.g = random(255);
         this.b = random(255);
-        this.mImg = img;
+        this.mImg = random(mImgs);
         this.blurriness = 0;
         this.glowColor = 0;
     }
