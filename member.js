@@ -6,9 +6,6 @@ class Member {
         this.mass = mass;
         this.dia = mass * 1;
 
-        this.r = random(100);
-        this.g = random(255);
-        this.b = random(255);
         this.id = id;
         this.img = img;
         this.blurriness = 0;
@@ -26,18 +23,13 @@ class Member {
         let distanceSq = vector.magSq();
 
         if (distanceSq < (this.dia + other.dia) * (this.dia + other.dia)) {
-            console.log(this.id + ' and ' + other.id + ' collided');
+            // console.log(this.id + ' and ' + other.id + ' collided');
 
             //??? this line makes C,D,E be attracted to pair A_B
-            // vector.mult(-0.03);
-
-            other.applyForce(vector.mult(0.03));
-
+            other.applyForce(vector.mult(0.05));
             //??? restitutiion decreases when C,D,E collide with pair A_B
             other.applyRestitution(-0.01);
-            // return true;
         }
-        // return false;
     }
 
     /***** STATE 2 — note sent: sender & receiver attract to each other *****/
@@ -53,23 +45,34 @@ class Member {
         let strength = multiplier * G * (this.mass * other.mass) / distanceSq;
         f.setMag(strength);
 
-        /*****??? if one pair stay too close after attraction, push each other away a little bit: bouncing weird *****/
-        if (distanceSq < (this.dia + other.dia) * (this.dia + other.dia)) {
-            f.mult(-10);
-            // other.applyRestitution(-0.01);
-            // console.log('pushed away');
+        let hasAttracted;
+
+        /***** increase attraction force when one pair is too far away *****/
+        if (distanceSq > (this.dia + other.dia) * (this.dia + other.dia)) {
+            f.mult(10);
+            // other.applyRestitution(-0.001);
+            // console.log('getting closer');
+            hasAttracted = false;
+            // return false;
         } else {
+            /***** add collision force to push each other away a little bit after attraction: bouncing weird *****/
             //????? gradually reduce bouncing: need to fix calculation
-            let value = 10;
-            value *= .9;
-            console.log(value);
+            let value = -10;
+            // value *= .9;
+            // console.log(value);
             f.mult(value);
-            // other.applyRestitution(-0.01);
-            // console.log('stayed the same');
+            // other.applyRestitution(-0.001);
+            // console.log('bouncing just a bit');
+            hasAttracted = true;
         }
         other.applyForce(f);
+        // other.applyForce(f.mult(1.5));
 
-        return true;
+        if (hasAttracted) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     applyRestitution(amount) {
@@ -92,11 +95,11 @@ class Member {
 
     checkEdges() {
         let exceededEdge = false;
-        if (this.pos.x < (this.dia * 2) || this.pos.x > width - (this.dia * 2)) {
+        if (this.pos.x < 0 || this.pos.x > width - (this.dia * 2)) {
             this.vel.x *= -1;
             exceededEdge = true;
         }
-        if (this.pos.y < (this.dia * 2) || this.pos.y > height - (this.dia * 2)) {
+        if (this.pos.y < 0 || this.pos.y > height - (this.dia * 2)) {
             this.vel.y *= -1;
             exceededEdge = true;
         }
@@ -107,8 +110,9 @@ class Member {
     }
 
     hovered(px, py) {
-        let d = dist(px, py, this.pos.x, this.pos.y)
-        if (d < this.r) {
+        let d = dist(px, py, this.pos.x, this.pos.y);
+        // console.log(d);
+        if (d < this.dia * 2) {
             console.log('note sent, members interacted!');
             return true;
         } else {

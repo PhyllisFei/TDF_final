@@ -32,7 +32,7 @@ for (fromId of ids) {
     }
 }
 
-/***** assign differnet attraction values to different pairs *****/
+/***** assign differnet attraction forces to different pairs *****/
 multipliers['A_B'] = 1;
 // multipliers['B_C'] = 2;
 // multipliers['C_D'] = 3;
@@ -80,29 +80,26 @@ function draw() {
 
     for (let i = 0; i < members.length; i++) {
         let m = members[i];
-        if (!m.img) {
-            continue;
-        }
+        // if (!m.img) {
+        //     continue;
+        // }
 
         /***** STATE 1 - default — no interaction among team members: members move freely, collide *****/
-        // let hasCollided = false;
         for (let j = 0; j < members.length; j++) {
             if (i != j) {
                 let other = members[j];
                 m.checkCollision(other);
 
-                /***** STATE 2 — note sent: sender & receiver attract to each other *****/
-                /***** sudo attraction between members[0] and members[1] *****/
+                /***** STATE 2 — note sent: sender & receiver attract to each other, both glow *****/
                 //---- TO-BE-ADDED: MQTT & websocket listener ----//
-                // if (!hasCollided && m.checkCollision(other)) {
-                // hasCollided = true;
 
-                let hasAttracted = false;
-                m.attract(other);
-                if (hasAttracted) {
+                if (m.attract(other)) {
+                    //???? TO-BE-FIXED: glow effect is not applied to the pair, seems random
+                    m.changeGlow(color(0, 0, 0, 150), 15);
                     m.applyRestitution(-0.01);
+                } else {
+                    m.changeGlow(0, 0);
                 }
-                // }
             }
         }
 
@@ -111,19 +108,20 @@ function draw() {
         m.checkEdges();
 
         /***** mouse hover: glowing effect *****/
-        if (m.hovered(mouseX, mouseY)) {
-            //???----- TO-BE-FIXED: add blur to the background, highlight the receiver avatar -----//
-            cvs.style('filter', blur);
+        // if (m.hovered(mouseX, mouseY)) {
+        // console.log('yes')
+        //???----- TO-BE-FIXED: add blur to the background, highlight the receiver avatar -----//
+        // cvs.style('filter', blur);
 
-            m.changeGlow(color(0, 0, 0, 150), 15);
+        // m.changeGlow(color(0, 0, 0, 150), 15);
 
-            //???---- TO-BE-FIXED: show popup window ----//
-            // if (mouseIsPressed) {
-            // m.popupWindow();
-            // }
-        } else {
-            m.changeGlow(0, 0);
-        }
+        //???---- TO-BE-FIXED: show popup window ----//
+        // if (mouseIsPressed) {
+        // m.popupWindow();
+        // }
+        // } else {
+        // m.changeGlow(0, 0);
+        // }
     }
 }
 
@@ -158,7 +156,7 @@ function sendNote() {
 
 /***** close popup window if "No" *****/
 function hideDiv() {
-    bgclr = color(200);
+    bgclr = color(250);
     popupDiv.hide();
 }
 
