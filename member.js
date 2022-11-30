@@ -5,6 +5,7 @@ class Member {
         this.acc = createVector(0, 0);
         this.mass = mass;
         this.dia = mass * 1;
+        this.hasAttracted;
 
         this.id = id;
         this.img = img;
@@ -23,12 +24,22 @@ class Member {
         let distanceSq = vector.magSq();
 
         if (distanceSq < (this.dia + other.dia) * (this.dia + other.dia)) {
-            // console.log(this.id + ' and ' + other.id + ' collided');
+            console.log(this.id + ' and ' + other.id + ' collided');
 
-            //??? this line makes C,D,E be attracted to pair A_B
-            other.applyForce(vector.mult(0.05));
-            //??? restitutiion decreases when C,D,E collide with pair A_B
-            other.applyRestitution(-0.01);
+            //when value >0: members bounce back and forth with each other
+            other.applyForce(vector.mult(0.05)); //0.05
+            //when value <0: members are attracted to each other
+            // other.applyForce(vector.mult(-0.05));
+
+            //decrease speed when C,D,E collide with pair A_B
+            other.applyRestitution(-0.001);
+
+            //prevent others' spd from reducing to 0
+            let spd = other.vel.mag();
+            // console.log(spd);
+            if (spd <= 0.5) {
+                other.vel.mult(1.1);
+            }
         }
     }
 
@@ -45,30 +56,27 @@ class Member {
         let strength = multiplier * G * (this.mass * other.mass) / distanceSq;
         f.setMag(strength);
 
-        let hasAttracted;
-
         /***** increase attraction force when one pair is too far away *****/
         if (distanceSq > (this.dia + other.dia) * (this.dia + other.dia)) {
             f.mult(10);
             // other.applyRestitution(-0.001);
             // console.log('getting closer');
-            hasAttracted = false;
-            // return false;
+            this.hasAttracted = false;
         } else {
             /***** add collision force to push each other away a little bit after attraction: bouncing weird *****/
             //????? gradually reduce bouncing: need to fix calculation
-            let value = -10;
+            let value = -1; //10
             // value *= .9;
             // console.log(value);
             f.mult(value);
             // other.applyRestitution(-0.001);
             // console.log('bouncing just a bit');
-            hasAttracted = true;
+            this.hasAttracted = true;
         }
         other.applyForce(f);
         // other.applyForce(f.mult(1.5));
 
-        if (hasAttracted) {
+        if (this.hasAttracted) {
             return true;
         } else {
             return false;
@@ -109,6 +117,7 @@ class Member {
         }
     }
 
+    // comment out later
     hovered(px, py) {
         let d = dist(px, py, this.pos.x, this.pos.y);
         // console.log(d);
