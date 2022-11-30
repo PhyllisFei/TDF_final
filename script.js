@@ -33,7 +33,7 @@ for (fromId of ids) {
 }
 
 /***** assign differnet attraction values to different pairs *****/
-multipliers['A_B'] = 300;
+multipliers['A_B'] = 1;
 // multipliers['B_C'] = 2;
 // multipliers['C_D'] = 3;
 // multipliers['D_E'] = 4;
@@ -46,8 +46,6 @@ let popupDiv;
 let text;
 let btn1;
 let btn2;
-
-// let attracted = false;
 
 /***** preload images *****/
 function preload() {
@@ -86,31 +84,31 @@ function draw() {
             continue;
         }
 
-        /***** STATE 1 - default: no interaction among team members *****/
-        let hasCollided = false;
+        /***** STATE 1 - default — no interaction among team members: members move freely, collide *****/
+        // let hasCollided = false;
         for (let j = 0; j < members.length; j++) {
             if (i != j) {
                 let other = members[j];
-                // m.checkCollision(other);
-                if (!hasCollided && m.checkCollision(other)) {
-                    hasCollided = true;
-                }
+                m.checkCollision(other);
 
+                /***** STATE 2 — note sent: sender & receiver attract to each other *****/
+                /***** sudo attraction between members[0] and members[1] *****/
+                //---- TO-BE-ADDED: MQTT & websocket listener ----//
+                // if (!hasCollided && m.checkCollision(other)) {
+                // hasCollided = true;
+
+                let hasAttracted = false;
                 m.attract(other);
+                if (hasAttracted) {
+                    m.applyRestitution(-0.01);
+                }
+                // }
             }
         }
 
         m.update();
         m.display();
         m.checkEdges();
-
-        /***** STATE 2 — note sent: sender & receiver attract to each other *****/
-        /***** sudo attraction between members[0] and members[1] *****/
-        //---- TO-BE-ADDED: MQTT & websocket listener ----//
-        // if (attracted) {
-        //     m.attract()
-        //     console.log('pressed');
-        // }
 
         /***** mouse hover: glowing effect *****/
         if (m.hovered(mouseX, mouseY)) {
@@ -128,15 +126,6 @@ function draw() {
         }
     }
 }
-
-//??? TO-BE-FIXED: seems like it's constantly being triggered once key is pressed
-// function keyTyped() {
-//     if (key == 'a') {
-//         attracted = true;
-//     } else {
-//         attracted = false;
-//     }
-// }
 
 //???---- TO-BE-FIXED: show popup window when mouse click on one member ----//
 /***** create a modal box *****/
@@ -173,6 +162,7 @@ function hideDiv() {
     popupDiv.hide();
 }
 
+// BELOW CURRENTLY UNAVAILABLE
 /***** add a member to the screen *****/
 function keyPressed() {
     m = new Member(random(width), random(height), 40);
