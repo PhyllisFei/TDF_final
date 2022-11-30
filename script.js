@@ -1,81 +1,149 @@
+/***** store images with ID in an array *****/
+class User {
+    constructor(id, url) {
+        this.id = id;
+        this.url = url;
+    }
+
+    preload() {
+        this.img = loadImage(this.url);
+    }
+}
+
+/***** assign ID to images and store them in an array *****/
+let members = [];
+let users = new Map();
+users.set('A', new User('A', 'imgs/img0.png'));
+users.set('B', new User('B', 'imgs/img1.png'));
+users.set('C', new User('C', 'imgs/img2.png'));
+users.set('D', new User('D', 'imgs/img3.png'));
+users.set('E', new User('E', 'imgs/img4.png'));
+const ids = new Array(...users.keys());
+
+/***** pair two IDs together and sort in alphabetical sequences *****/
+const multipliers = {};
+for (fromId of ids) {
+    for (toId of ids) {
+        if (fromId !== toId) {
+            const pair = [fromId, toId];
+            pair.sort();
+            multipliers[pair.join('_')] = 0;
+        }
+    }
+}
+
+/***** assign differnet attraction values to different pairs *****/
+multipliers['A_B'] = 300;
+// multipliers['B_C'] = 2;
+// multipliers['C_D'] = 3;
+// multipliers['D_E'] = 4;
+// multipliers['A_E'] = 5;
+
 let cvs;
 let bgclr;
-
-let members = [];
-let m;
-let mImgs = [];
 
 let popupDiv;
 let text;
 let btn1;
 let btn2;
 
-/***** preload image to array *****/
+// let attracted = false;
+
+/***** preload images *****/
 function preload() {
-    for (let i = 0; i < 2; i++) {
-        mImgs[i] = loadImage('imgs/img' + i + '.png');
+    for (const user of users.values()) {
+        user.preload();
     }
 }
 
 function setup() {
-    cvs = createCanvas(windowWidth, windowHeight);
-    bgclr = color(200);
+    // cvs = createCanvas(windowWidth, windowHeight);
+    cvs = createCanvas(800, 600);
+    bgclr = color(250);
 
-    for (let i = 0; i < 5; i++) {
+    // members.push(new Member(null, null, width / 2, height / 2, 50));
+
+    const entries = new Array(...users.entries());
+    for (let i = 0; i < entries.length; i++) {
         let x = 80 + 100 * i;
         let y = random(50, height - 50);
         let r = 40;
-        m = new Member(x, y, r);
+        const [id, user] = entries[i];
+        const m = new Member(id, user.img, x, y, r);
         members.push(m);
     }
 
-    // popupWindow();
+    //---- TO-BE-FIXED: show popup window ----//
+    popupWindow();
 }
 
 function draw() {
     background(bgclr);
 
     for (let i = 0; i < members.length; i++) {
-        m = members[i];
-        // console.log(members.length);
+        let m = members[i];
+        if (!m.img) {
+            continue;
+        }
+
+        /***** STATE 1 - default: no interaction among team members *****/
+        let hasCollided = false;
+        for (let j = 0; j < members.length; j++) {
+            if (i != j) {
+                let other = members[j];
+                // m.checkCollision(other);
+                if (!hasCollided && m.checkCollision(other)) {
+                    hasCollided = true;
+                }
+
+                m.attract(other);
+            }
+        }
+
         m.update();
-        m.checkEdge();
         m.display();
+        m.checkEdges();
+
+        /***** STATE 2 — note sent: sender & receiver attract to each other *****/
+        /***** sudo attraction between members[0] and members[1] *****/
+        //---- TO-BE-ADDED: MQTT & websocket listener ----//
+        // if (attracted) {
+        //     m.attract()
+        //     console.log('pressed');
+        // }
 
         /***** mouse hover: glowing effect *****/
         if (m.hovered(mouseX, mouseY)) {
+            //???----- TO-BE-FIXED: add blur to the background, highlight the receiver avatar -----//
+            cvs.style('filter', blur);
+
             m.changeGlow(color(0, 0, 0, 150), 15);
 
-            //---- TO-BE-FIXED: show popup window ----//
+            //???---- TO-BE-FIXED: show popup window ----//
             // if (mouseIsPressed) {
             // m.popupWindow();
             // }
         } else {
             m.changeGlow(0, 0);
         }
-
-        /***** STATE 1 - default: no interaction among team members *****/
-        for (let j = 0; j < members.length; j++) {
-            if (i != j) {
-                let other = members[j];
-                m.checkCollisiion(other);
-            }
-        }
-
-        /***** STATE 2 — note sent: sender & receiver attract to each other *****/
-        /***** sudo attraction between members[0] and members[1] *****/
-        //---- TO-BE-ADDED: MQTT & websocket listener ----//
-
-        // m.attract()
     }
 }
 
-//---- TO-BE-FIXED, see line 49: show popup window when mouse click on one member ----//
+//??? TO-BE-FIXED: seems like it's constantly being triggered once key is pressed
+// function keyTyped() {
+//     if (key == 'a') {
+//         attracted = true;
+//     } else {
+//         attracted = false;
+//     }
+// }
+
+//???---- TO-BE-FIXED: show popup window when mouse click on one member ----//
 /***** create a modal box *****/
 function popupWindow() {
     popupDiv = createDiv();
     popupDiv.id('popupDiv');
-    popupDiv.position(500, 500);
+    popupDiv.position(300, 700);
 
     text = createP('Want to send a note?');
     text.parent(popupDiv);
@@ -120,111 +188,5 @@ function doubleClicked() {
         if (m.hovered(mouseX, mouseY)) {
             members.splice(i, 1);
         }
-    }
-}
-
-
-class Member {
-    constructor(x, y, mass) {
-        this.pos = createVector(x, y);
-        this.vel = p5.Vector.random2D();
-        this.acc = createVector();
-        // this.mass = mass;
-        this.dia = mass * 1;
-
-        this.r = random(100);
-        this.g = random(255);
-        this.b = random(255);
-        this.mImg = random(mImgs);
-        this.blurriness = 0;
-        this.glowColor = 0;
-    }
-
-    hovered(px, py) {
-        let d = dist(px, py, this.pos.x, this.pos.y)
-        if (d < this.r) {
-            console.log('note sent, members interacted!');
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // popupWindow() {
-    /***** create a modal box *****/
-    //     popupDiv = createDiv();
-    //     popupDiv.id('popupDiv');
-    //     popupDiv.position(this.pos.x, this.pos.y);
-
-    //     text = createP('Want to send a note?');
-    //     text.parent(popupDiv);
-
-    //     btn1 = createButton('Yes');
-    //     btn1.class('btn');
-    //     btn1.id('btn1');
-    //     btn1.parent(popupDiv);
-    //     btn1.mousePressed(sendNote);
-
-    //     btn2 = createButton('No ');
-    //     btn2.class('btn');
-    //     btn2.id('btn2');
-    //     btn2.parent(popupDiv);
-    //     btn2.mousePressed(hideDiv);
-    // }
-
-    changeGlow(clr, blur) {
-        this.blurriness = blur;
-        this.glowColor = clr;
-    }
-
-    applyForce(force) {
-        let f = createVector();
-        f = force.copy();
-        // f.div(this.mass);
-        this.acc.add(f);
-    }
-
-    /***** STATE 1 - default: no interaction among team members *****/
-    checkCollisiion(other) {
-        let vector = p5.Vector.sub(other.pos, this.pos);
-        let distanceSq = vector.magSq();
-
-        if (distanceSq < (this.dia + other.dia) * (this.dia + other.dia)) {
-            vector.mult(-0.001);
-            this.applyForce(vector);
-        }
-    }
-
-    /***** STATE 2 — note sent: sender & receiver attract to each other *****/
-    //??? identify who is sending and who is receving, need to bind
-    //sudo: members[0], members[1]
-    attract() {
-        //
-    }
-
-    update() {
-        this.vel.add(this.acc);
-        this.pos.add(this.vel);
-        this.acc.mult(0);
-    }
-
-    checkEdge() {
-        if (this.pos.x < 50 || this.pos.x > width - 50) {
-            this.vel.x *= -1;
-        }
-        if (this.pos.y < 50 || this.pos.y > height - 50) {
-            this.vel.y *= -1;
-        }
-    }
-
-    display() {
-        drawingContext.shadowBlur = this.blurriness;
-        drawingContext.shadowColor = this.glowColor;
-
-        stroke(this.r, this.g, this.b, 100)
-        fill(this.r, this.g, this.b, 100);
-        ellipse(this.pos.x, this.pos.y, this.dia * 2, this.dia * 2);
-
-        image(this.mImg, this.pos.x - 30, this.pos.y - 30, this.dia * 2, this.dia * 2);
     }
 }
