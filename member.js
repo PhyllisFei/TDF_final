@@ -32,7 +32,7 @@ class Member {
             // other.applyForce(vector.mult(-0.05));
 
             //decrease speed when C,D,E collide with pair A_B
-            other.applyRestitution(-0.001);
+            other.applyRestitution(1 - 0.001);
 
             //prevent others' spd from reducing to 0
             let spd = other.vel.mag();
@@ -59,9 +59,8 @@ class Member {
         /***** increase attraction force when one pair is too far away *****/
         if (distanceSq > (this.dia + other.dia) * (this.dia + other.dia)) {
             f.mult(10);
-            // other.applyRestitution(-0.001);
+            // other.applyRestitution(1 - 0.001);
             // console.log('getting closer');
-            this.hasAttracted = false;
         } else {
             /***** add collision force to push each other away a little bit after attraction: bouncing weird *****/
             //????? gradually reduce bouncing: need to fix calculation
@@ -69,22 +68,20 @@ class Member {
             // value *= .9;
             // console.log(value);
             f.mult(value);
-            // other.applyRestitution(-0.001);
+            // other.applyRestitution(1 - 0.001);
             // console.log('bouncing just a bit');
-            this.hasAttracted = true;
+            this.applyRestitution(1 - 0.03);
+            if (multiplier) {
+                this.hasAttracted = true;
+            }
         }
         other.applyForce(f);
         // other.applyForce(f.mult(1.5));
 
-        if (this.hasAttracted) {
-            return true;
-        } else {
-            return false;
-        }
+        return this.hasAttracted;
     }
 
-    applyRestitution(amount) {
-        let value = 1.0 + amount;
+    applyRestitution(value) {
         this.vel.mult(value);
     }
 
