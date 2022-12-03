@@ -39,6 +39,10 @@ multipliers['A_B'] = 1;
 // multipliers['D_E'] = 4;
 // multipliers['A_E'] = 5;
 
+let socket;
+let imageArray = [];
+let receivedImgs;
+
 let cvs;
 let bgclr;
 
@@ -73,7 +77,21 @@ function setup() {
 
     //---- TO-BE-FIXED: show popup window ----//
     popupWindow();
+
+    //Setup socket - connect to localhost, and same post
+    //as the one specified in the server.js
+    //The packet name (ServerToClient) need also to be
+    //the same as specific in the server.js
+    //When a message is received, the socketEvents function will run
+    // socket = io('http://localhost:3000'); //run locally
+    // socket = io();
+    // socket.on('ServerToClient', socketEvents);
 }
+
+// function socketEvents(data) {
+//     //receive image data and pass it to the global variable array
+//     imageArray.push(data.receivedImgs);
+// }
 
 function draw() {
     background(bgclr);
@@ -96,7 +114,6 @@ function draw() {
                 if (m.attract(other)) {
                     //???? TO-BE-FIXED: glow effect is not applied to the pair, seems random
                     m.changeGlow(color(0, 0, 0, 150), 15);
-                    m.applyRestitution(-0.01);
                 } else {
                     m.changeGlow(0, 0);
                 }
