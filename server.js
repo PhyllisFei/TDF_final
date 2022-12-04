@@ -1,13 +1,14 @@
 let broker = 'b34d25a1f44a4d4eb2b7b0157d810da7.s2.eu.hivemq.cloud';
 let broker_port = '8883';
-let path = '8884';
+let websocket_path = '8884';
 let clientId = 'mqttjs_';// + parseInt(Math.random() * 100);
 let topic = 'phyllis_subs';
 let username = 'zpfei';
 let password = 'phyFei_2022';
 
-// let client = new Paho.MQTT.Client(broker, options);
-let client = new Paho.MQTT.Client(broker, broker_port, clientId);
+// let client = new Paho.MQTT.Client(broker, port, clientId);
+// let client = new Paho.MQTT.Client(broker, Number(location.port), clientId);
+let client = new Paho.MQTT.Client(broker, Number(8884), clientId);
 
 // set callback handlers
 client.onConnectionLost = onConnectionLost;
@@ -15,7 +16,7 @@ client.onMessageArrived = onMessageArrived;
 
 // connect the client
 client.connect({
-    onSuccess: onConnect,
+    onSuccess: onConnected,
     useSSL: true,
     userName: 'zpfei',
     password: 'phyFei_2022'
@@ -24,9 +25,9 @@ client.connect({
 // called when the client connects
 function onConnected() {
     // Once a connection has been made, make a subscription and send a message.
-    console.log("onConnect");
+    console.log("onConnected");
     client.subscribe(topic);
-    message = new Paho.MQTT.Message('connected!');
+    message = new Paho.MQTT.Message('image received'); //send image to broker
     message.destinationName = topic;
     client.send(message);
 }
@@ -34,13 +35,13 @@ function onConnected() {
 // called when the client loses its connection
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-        console.log("onConnectionLost:" + responseObject.errorMessage);
+        console.log("onConnectionLost: " + responseObject.errorMessage);
     }
 }
 
 // called when a message arrives
 function onMessageArrived(message) {
-    console.log("onMessageArrived:" + message.payloadString);
+    console.log("onMessageArrived: " + message.payloadString);
 }
 
 //Import the necessary libraries
