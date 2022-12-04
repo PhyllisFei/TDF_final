@@ -27,8 +27,12 @@ function onConnected() {
     // Once a connection has been made, make a subscription and send a message.
     console.log("onConnected");
     client.subscribe(topic);
-    message = new Paho.MQTT.Message('image received'); //send image to broker
+    // message = new Paho.MQTT.Message('image received'); //send image to broker
+    message = new Paho.MQTT.Message(document.getElementById(json.image)); //?????? send image to broker
     message.destinationName = topic;
+
+    //if btn is clicked — send
+    //else, nothing
     client.send(message);
 }
 
