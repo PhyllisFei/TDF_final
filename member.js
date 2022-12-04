@@ -24,7 +24,7 @@ class Member {
         let distanceSq = vector.magSq();
 
         if (distanceSq < (this.dia + other.dia) * (this.dia + other.dia)) {
-            console.log(this.id + ' and ' + other.id + ' collided');
+            // console.log(this.id + ' and ' + other.id + ' collided');
 
             //when value >0: members bounce back and forth with each other
             other.applyForce(vector.mult(0.05)); //0.05
