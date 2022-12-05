@@ -27,13 +27,23 @@ function onConnected() {
     // Once a connection has been made, make a subscription and send a message.
     console.log("onConnected");
     client.subscribe(topic);
-    // message = new Paho.MQTT.Message('image received'); //send image to broker
-    message = new Paho.MQTT.Message(document.getElementById(json.image)); //?????? send image to broker
+    message = new Paho.MQTT.Message('image received'); //send image to broker
+
+    //??????? send image to broker
+    // message = new Paho.MQTT.Message(JSON.parse(message.payloadString));
+    //??????
+
     message.destinationName = topic;
+    client.send(message);
+}
+
+// called when a message arrives
+function onMessageArrived(message) {
+    // let msg = JSON.parse(message.payloadString);
+    // console.log("onMessageArrived: " + msg);
 
     //if btn is clicked — send
-    //else, nothing
-    client.send(message);
+    // client.send(message);
 }
 
 // called when the client loses its connection
@@ -43,16 +53,10 @@ function onConnectionLost(responseObject) {
     }
 }
 
-// called when a message arrives
-function onMessageArrived(message) {
-    console.log("onMessageArrived: " + message.payloadString);
-}
-
 //Import the necessary libraries
 // let mqtt = new Paho.MQTT.Client();
 
 ////// npm + node.js + mqtt OR mqtt?
-/*----- is below needed? -----*/
 // let express = require('express');
 // let socket = require('socket.io');
 
@@ -108,6 +112,5 @@ function onMessageArrived(message) {
 //             //Publish to the topic
 //             client.send(message);
 //         });
-
 //     });
 // });
