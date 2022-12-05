@@ -112,22 +112,34 @@ class Member {
         } else {
             this.vel = createVector(constrain(this.vel.x, -2, 2), constrain(this.vel.y, -2, 2));
         }
-    }
 
-    // comment out later
-    hovered(px, py) {
-        let d = dist(px, py, this.pos.x, this.pos.y);
-        // console.log(d);
-        if (d < this.dia * 2) {
-            console.log('note sent, members interacted!');
-            return true;
-        } else {
-            return false;
-        }
+        // //??? limit movements in a circle
+        // let r = 200;
+        // let angle = TWO_PI;
+        // if (this.pos.x < abs(r * cos(angle))) {
+        //     this.vel.x *= -1;
+        //     exceededEdge = true;
+        // }
+        // if (this.pos.y > abs(r * sin(angle))) {
+        //     this.vel.y *= -1;
+        //     exceededEdge = true;
+        // }
     }
 
     changeGlow(clr, blur) {
         this.blurriness = blur;
         this.glowColor = clr;
     }
+
+    // // comment out later
+    // hovered(px, py) {
+    //     let d = dist(px, py, this.pos.x, this.pos.y);
+    //     // console.log(d);
+    //     if (d < this.dia * 2) {
+    //         console.log('note sent, members interacted!');
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
 }
