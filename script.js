@@ -76,7 +76,7 @@ function setup() {
     }
 
     //---- TO-BE-FIXED: show popup window ----//
-    popupWindow();
+    popup();
 
     //Setup socket - connect to localhost, and same post
     //as the one specified in the server.js
@@ -111,8 +111,8 @@ function draw() {
                 /***** STATE 2 — note sent: sender & receiver attract to each other, both glow *****/
                 //---- TO-BE-ADDED: MQTT & websocket listener ----//
 
+                // if button clicked && message sent
                 if (m.attract(other)) {
-                    //???? TO-BE-FIXED: glow effect is not applied to the pair, seems random
                     m.changeGlow(color(0, 0, 0, 150), 15);
                 } else {
                     m.changeGlow(0, 0);
@@ -134,7 +134,7 @@ function draw() {
 
         //???---- TO-BE-FIXED: show popup window ----//
         // if (mouseIsPressed) {
-        // m.popupWindow();
+        // m.popup();
         // }
         // } else {
         // m.changeGlow(0, 0);
@@ -143,8 +143,13 @@ function draw() {
 }
 
 //???---- TO-BE-FIXED: show popup window when mouse click on one member ----//
+// function mousePressed() {
+//     popup();
+// }
+
+
 /***** create a modal box *****/
-function popupWindow() {
+function popup() {
     popupDiv = createDiv();
     popupDiv.id('popupDiv');
     popupDiv.position(300, 700);
@@ -178,20 +183,20 @@ function hideDiv() {
 }
 
 // BELOW CURRENTLY UNAVAILABLE
-/***** add a member to the screen *****/
-function keyPressed() {
-    m = new Member(random(width), random(height), 40);
-    if (keyCode === UP_ARROW) {
-        members.push(m);
-    }
-}
+// /***** add a member to the screen *****/
+// function keyPressed() {
+//     m = new Member(random(width), random(height), 40);
+//     if (keyCode === UP_ARROW) {
+//         members.push(m);
+//     }
+// }
 
-/***** remove a member from the screen *****/
-function doubleClicked() {
-    for (let i = members.length - 1; i >= 0; i--) {
-        m = members[i];
-        if (m.hovered(mouseX, mouseY)) {
-            members.splice(i, 1);
-        }
-    }
-}
+// /***** remove a member from the screen *****/
+// function doubleClicked() {
+//     for (let i = members.length - 1; i >= 0; i--) {
+//         m = members[i];
+//         if (m.hovered(mouseX, mouseY)) {
+//             members.splice(i, 1);
+//         }
+//     }
+// }
