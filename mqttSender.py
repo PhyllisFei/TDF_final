@@ -1,6 +1,6 @@
 # below is to enable pi to send image data to the MQTT broker
 
-import time
+import base64
 import asyncio
 import websockets
 import json
@@ -35,33 +35,41 @@ async def ws_on_message(websocket):  # {"receiver_id": "john"}
     while True:
         message = await websocket.recv()
         print(message)
-        f = open("test.jpg")
-        filecontent = f.read()
+        with open("/Users/phyllisfei/Desktop/img0.png", "rb") as file:
+            encoded = base64.b64encode(file.read())
 
-        ws_data = json.loads(message)
-        mqtt_data = {
-            "sender_id": user_id,
-            "receiver_id": ws_data.receiver_id,
-            "image": filecontent
-        }
-        msg = json.dumps(mqtt_data)
-        mqtt_client.subscribe(topic)
-        mqtt_client.publish(topic, msg)
-        print('published: ' + msg)
+            ws_data = json.loads(message)
+            mqtt_data = {
+                "sender_id": user_id,
+                "receiver_id": ws_data["receiver_id"],
+                "image": encoded.decode()
+            }
+            msg = json.dumps(mqtt_data)
+            mqtt_client.subscribe(topic)
+            mqtt_client.publish(topic, msg)
+            # print('published: ' + msg)
 
 
 # below is to enable pi to send image data to the MQTT broker
 
 # The callback for when a PUBLISH message is received from the server.
 def mqtt_on_message(ws_client, mqtt_client, userdata, msg):
-    mqtt_data = json.loads(str(msg.payload))
-    if mqtt_data.sender_id == user_id:
+    # print(str(msg.payload))
+    # with open("/Users/phyllisfei/Desktop/test.json", "wb") as file:
+    #     file.write(msg.payload)
+    #     file.close()
+    mqtt_data = json.loads(msg.payload)
+    if mqtt_data["sender_id"] == user_id:
         # I am the sender
         return
-    if mqtt_data.receiver_id == user_id:
+    if mqtt_data["receiver_id"] == user_id:
         # I am the receiver
         ws_client.send(str(msg.payload))
-        print_receipt(mqtt_data.image)
+        print_receipt(mqtt_data["image"])
+        print(mqtt_data["image"])
+        with open("/Users/phyllisfei/Desktop/received_img0.png", "wb") as file:
+            file.write(base64.b64decode(mqtt_data["image"]))
+            file.close()
     else:
         # I am a 3rd person
         ws_client.send(str(msg.payload))
