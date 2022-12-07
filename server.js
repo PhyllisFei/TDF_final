@@ -6,41 +6,22 @@ let topic = 'phyllis_subs';
 let username = 'zpfei';
 let password = 'phyFei_2022';
 
-// let client = new Paho.MQTT.Client(broker, port, clientId);
-// let client = new Paho.MQTT.Client(broker, Number(location.port), clientId);
-let client = new Paho.MQTT.Client(broker, Number(8884), clientId);
+const socket = new WebSocket('ws://127.0.0.1:38001/ws')
 
-// set callback handlers
-client.onConnectionLost = onConnectionLost;
-client.onMessageArrived = onMessageArrived;
-
-// connect the client
-client.connect({
-    onSuccess: onConnected,
-    useSSL: true,
-    userName: 'zpfei',
-    password: 'phyFei_2022'
-});
+// socket.onopen = onConnected;
+socket.onmessage = onMessageArrived;
+socket.onerror = onConnectionLost;
 
 // called when the client connects
 function onConnected() {
     // Once a connection has been made, make a subscription and send a message.
-    console.log("onConnected");
-    client.subscribe(topic);
-    message = new Paho.MQTT.Message('image received'); //send image to broker
-
-    //??????? send image to broker
-    // message = new Paho.MQTT.Message(JSON.parse(message.payloadString));
-    //??????
-
-    message.destinationName = topic;
-    client.send(message);
+    socket.send(JSON.stringify({ receiver_id: 'phyllis' })); //ziyi
 }
 
 // called when a message arrives
 function onMessageArrived(message) {
-    // let msg = JSON.parse(message.payloadString);
-    // console.log("onMessageArrived: " + msg);
+    let msg = JSON.parse(message);
+    console.log("onMessageArrived: " + message);
 
     //if btn is clicked — send
     // client.send(message);
@@ -53,10 +34,20 @@ function onConnectionLost(responseObject) {
     }
 }
 
-//Import the necessary libraries
-// let mqtt = new Paho.MQTT.Client();
+// let client = new Paho.MQTT.Client(broker, Number(8884), clientId);
 
-////// npm + node.js + mqtt OR mqtt?
+// // set callback handlers
+// client.onConnectionLost = onConnectionLost;
+// client.onMessageArrived = onMessageArrived;
+
+// // connect the client
+// client.connect({
+//     onSuccess: onConnected,
+//     useSSL: true,
+//     userName: 'zpfei',
+//     password: 'phyFei_2022'
+// });
+
 // let express = require('express');
 // let socket = require('socket.io');
 
@@ -68,7 +59,6 @@ function onConnectionLost(responseObject) {
 //     username: "zpfei",
 //     password: 'phyFei_2022'
 // };
-
 
 // //Store the express functions to the app
 // let app = express();
@@ -86,7 +76,6 @@ function onConnectionLost(responseObject) {
 //     'xhr-polling',
 //     'jsonp-polling',
 //     'polling']);
-
 
 // //MQTT Message
 // client.on('connect', function (connack) { // When connected
