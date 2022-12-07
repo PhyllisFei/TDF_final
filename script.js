@@ -1,3 +1,7 @@
+/***** assign a unique id to this front end *****/
+let deviceID = 'userA';
+let msgSent = false;
+
 /***** store images with ID in an array *****/
 class User {
     constructor(id, url) {
@@ -33,15 +37,13 @@ for (fromId of ids) {
 }
 
 /***** assign differnet attraction forces to different pairs *****/
-multipliers['A_B'] = 1;
-// multipliers['B_C'] = 2;
-// multipliers['C_D'] = 3;
-// multipliers['D_E'] = 4;
-// multipliers['A_E'] = 5;
-
-let socket;
-let imageArray = [];
-let receivedImgs;
+function assignForces() {
+    multipliers['D_E'] = 1;
+    // multipliers['B_C'] = 2;
+    // multipliers['C_D'] = 3;
+    // multipliers['D_E'] = 4;
+    // multipliers['A_E'] = 5;
+}
 
 let cvs;
 let bgclr;
@@ -63,8 +65,6 @@ function setup() {
     cvs = createCanvas(800, 600);
     bgclr = color(250);
 
-    // members.push(new Member(null, null, width / 2, height / 2, 50));
-
     const entries = new Array(...users.entries());
     for (let i = 0; i < entries.length; i++) {
         let x = 80 + 100 * i;
@@ -75,34 +75,18 @@ function setup() {
         members.push(m);
     }
 
-    //---- TO-BE-FIXED: show popup window ----//
+    //---- TO-BE-FIXED: click each member to show popup window ----//
     popup();
 
-    //Setup socket - connect to localhost, and same post
-    //as the one specified in the server.js
-    //The packet name (ServerToClient) need also to be
-    //the same as specific in the server.js
-    //When a message is received, the socketEvents function will run
-    // socket = io('http://localhost:3000'); //run locally
-    // socket = io();
-    // socket.on('ServerToClient', socketEvents);
 }
-
-// function socketEvents(data) {
-//     //receive image data and pass it to the global variable array
-//     imageArray.push(data.receivedImgs);
-// }
 
 function draw() {
     background(bgclr);
 
     for (let i = 0; i < members.length; i++) {
         let m = members[i];
-        // if (!m.img) {
-        //     continue;
-        // }
 
-        /***** STATE 1 - default — no interaction among team members: members move freely, collide *****/
+        /***** STATE 1 - default — no interaction among team members: move freely, collide *****/
         for (let j = 0; j < members.length; j++) {
             if (i != j) {
                 let other = members[j];
@@ -111,12 +95,14 @@ function draw() {
                 /***** STATE 2 — note sent: sender & receiver attract to each other, both glow *****/
                 //---- TO-BE-ADDED: MQTT & websocket listener ----//
 
-                // if button clicked && message sent
+                // attract if button clicked && message sent
+                // if (msgSent) {
                 if (m.attract(other)) {
                     m.changeGlow(color(0, 0, 0, 150), 15);
                 } else {
                     m.changeGlow(0, 0);
                 }
+                // }
             }
         }
 
@@ -124,21 +110,9 @@ function draw() {
         m.display();
         m.checkEdges();
 
-        /***** mouse hover: glowing effect *****/
-        // if (m.hovered(mouseX, mouseY)) {
-        // console.log('yes')
-        //???----- TO-BE-FIXED: add blur to the background, highlight the receiver avatar -----//
-        // cvs.style('filter', blur);
-
-        // m.changeGlow(color(0, 0, 0, 150), 15);
-
-        //???---- TO-BE-FIXED: show popup window ----//
-        // if (mouseIsPressed) {
-        // m.popup();
-        // }
-        // } else {
-        // m.changeGlow(0, 0);
-        // }
+        if (msgSent) {
+            assignForces();
+        }
     }
 }
 
@@ -147,12 +121,11 @@ function draw() {
 //     popup();
 // }
 
-
 /***** create a modal box *****/
 function popup() {
     popupDiv = createDiv();
     popupDiv.id('popupDiv');
-    popupDiv.position(300, 700);
+    popupDiv.position(260, 200);
 
     text = createP('Want to send a note?');
     text.parent(popupDiv);
@@ -170,15 +143,19 @@ function popup() {
     btn2.mousePressed(hideDiv);
 }
 
-/***** send note pic if "Yes", currently changes bgclr as a place holder *****/
+/***** send pic to broker if "Yes" *****/
 function sendNote() {
-    //---- TO-BE-ADDED: MQTT & webSocket listener ----//
-    bgclr = color(100, 230, 180);
+    // bgclr = color(100, 230, 180);
+    onConnected();
+    popupDiv.hide();
+    msgSent = true;
+    console.log('sent');
+    console.log(msgSent);
 }
 
 /***** close popup window if "No" *****/
 function hideDiv() {
-    bgclr = color(250);
+    // bgclr = color(250);
     popupDiv.hide();
 }
 
@@ -199,4 +176,42 @@ function hideDiv() {
 //             members.splice(i, 1);
 //         }
 //     }
+// }
+
+// function applyGlow(){
+/***** mouse hover: glowing effect *****/
+        // if (m.hovered(mouseX, mouseY)) {
+        // console.log('yes')
+        //???----- TO-BE-FIXED: add blur to the background, highlight the receiver avatar -----//
+        // cvs.style('filter', blur);
+
+        // m.changeGlow(color(0, 0, 0, 150), 15);
+
+        //???---- TO-BE-FIXED: show popup window ----//
+        // if (mouseIsPressed) {
+        // m.popup();
+        // }
+        // } else {
+        // m.changeGlow(0, 0);
+        // }
+// }
+
+// let socket;
+// let imageArray = [];
+// let receivedImgs;
+
+// function socketSetup() {
+    //Setup socket - connect to localhost, and same post
+    //as the one specified in the server.js
+    //The packet name (ServerToClient) need also to be
+    //the same as specific in the server.js
+    //When a message is received, the socketEvents function will run
+    // socket = io('http://localhost:3000'); //run locally
+    // socket = io();
+    // socket.on('ServerToClient', socketEvents);
+// }
+
+// function socketEvents(data) {
+//     //receive image data and pass it to the global variable array
+//     imageArray.push(data.receivedImgs);
 // }
