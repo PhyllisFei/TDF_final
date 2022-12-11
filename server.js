@@ -13,18 +13,15 @@ socket.onmessage = onMessageArrived;
 socket.onerror = onConnectionLost;
 
 // called when the client connects
-function onConnected() {
+function onClick() {
     // Once a connection has been made, make a subscription and send a message.
-    socket.send(JSON.stringify({ receiver_id: 'phyllis' })); //ziyi
+    socket.send(JSON.stringify({ receiver_id: 'B' })); //change to a 2nd person later: ziyi
 }
 
 // called when a message arrives
 function onMessageArrived(message) {
     let msg = JSON.parse(message);
     console.log("onMessageArrived: " + message);
-
-    //if btn is clicked — send
-    // client.send(message);
 }
 
 // called when the client loses its connection
