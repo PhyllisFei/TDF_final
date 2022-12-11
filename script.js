@@ -8,7 +8,6 @@ class User {
         this.id = id;
         this.url = url;
     }
-
     preload() {
         this.img = loadImage(this.url);
     }
@@ -47,7 +46,6 @@ function assignForces() {
 
 let cvs;
 let bgclr;
-
 let popupDiv;
 let text;
 let btn1;
@@ -62,7 +60,7 @@ function preload() {
 
 function setup() {
     // cvs = createCanvas(windowWidth, windowHeight);
-    cvs = createCanvas(800, 600);
+    cvs = createCanvas(600, 400);
     bgclr = color(250);
 
     const entries = new Array(...users.entries());
@@ -77,7 +75,6 @@ function setup() {
 
     //---- TO-BE-FIXED: click each member to show popup window ----//
     popup();
-
 }
 
 function draw() {
@@ -85,7 +82,6 @@ function draw() {
 
     for (let i = 0; i < members.length; i++) {
         let m = members[i];
-
         /***** STATE 1 - default — no interaction among team members: move freely, collide *****/
         for (let j = 0; j < members.length; j++) {
             if (i != j) {
@@ -146,7 +142,7 @@ function popup() {
 /***** send pic to broker if "Yes" *****/
 function sendNote() {
     // bgclr = color(100, 230, 180);
-    onConnected();
+    onClick();
     popupDiv.hide();
     msgSent = true;
     console.log('sent');
