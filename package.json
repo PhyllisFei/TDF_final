@@ -1,0 +1,20 @@
+{
+  "name": "tdf_final",
+  "version": "1.0.0",
+  "description": "",
+  "main": "member copy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "serve ./"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PhyllisFei/TDF_final.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PhyllisFei/TDF_final/issues"
+  },
+  "homepage": "https://github.com/PhyllisFei/TDF_final#readme"
+}
